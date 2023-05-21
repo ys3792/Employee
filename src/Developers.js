@@ -5,7 +5,8 @@ const Developers = () => {
   const [developers, setDevelopers] = useState([]);
   const [searchName, setSearchName] = useState("");
   const [searchDesignation, setSearchDesignation] = useState("");
-  const [searchSkills, setSearchSkills] = useState("");
+  const [searchSkills, setSearchSkills] = useState([]);
+  const [filteredDevelopers, setFilteredDevelopers] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,22 +27,27 @@ const Developers = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    filterDevelopers();
+  }, [developers, searchName, searchDesignation, searchSkills]);
+
   const filterDevelopers = () => {
     const filteredDevelopers = developers.filter((developer) => {
       const nameMatch =
-        developer.name &&
-        developer.name.toLowerCase().includes(searchName.toLowerCase());
+        !searchName ||
+        (developer.name &&
+          developer.name.toLowerCase().includes(searchName.toLowerCase()));
       const designationMatch =
-        developer.designation &&
-        developer.designation
-          .toLowerCase()
-          .includes(searchDesignation.toLowerCase());
+        !searchDesignation ||
+        (developer.designation &&
+          developer.designation
+            .toLowerCase()
+            .includes(searchDesignation.toLowerCase()));
       const skillsMatch =
-        developer.skills &&
-        developer.skills.some((skill) =>
-          skill.toLowerCase().includes(searchSkills.toLowerCase())
-        );
-      return nameMatch || designationMatch || skillsMatch;
+        searchSkills.length === 0 ||
+        (developer.skills &&
+          searchSkills.some((skill) => developer.skills.includes(skill)));
+      return nameMatch && designationMatch && skillsMatch;
     });
     setFilteredDevelopers(filteredDevelopers);
   };
@@ -53,11 +59,16 @@ const Developers = () => {
     }
   };
 
-  const [filteredDevelopers, setFilteredDevelopers] = useState([]);
-
-  useEffect(() => {
-    filterDevelopers();
-  }, [developers, searchName, searchDesignation, searchSkills]);
+  const handleSkillChange = (event) => {
+    const { value, checked } = event.target;
+    setSearchSkills((prevSkills) => {
+      if (checked) {
+        return [...prevSkills, value];
+      } else {
+        return prevSkills.filter((skill) => skill !== value);
+      }
+    });
+  };
 
   return (
     <div className="container">
@@ -84,61 +95,90 @@ const Developers = () => {
       </div>
 
       <div className="input">
-        <input
-          type="text"
-          placeholder="Search by skills"
-          value={searchSkills}
-          onChange={(e) => setSearchSkills(e.target.value)}
-          onKeyDown={handleEnterKey}
-        />
+        <h4>Skills:</h4>
+        <div className="checkboxes">
+          <label>
+            <input
+              type="checkbox"
+              value="SQL"
+              checked={searchSkills.includes("SQL")}
+              onChange={handleSkillChange}
+            />
+            SQL
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="JavaScript"
+              checked={searchSkills.includes("JavaScript")}
+              onChange={handleSkillChange}
+            />
+            Javascript
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="Python"
+              checked={searchSkills.includes("Python")}
+              onChange={handleSkillChange}
+            />
+            Python
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="HTML"
+              checked={searchSkills.includes("HTML")}
+              onChange={handleSkillChange}
+            />
+            HTML
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="CSS"
+              checked={searchSkills.includes("CSS")}
+              onChange={handleSkillChange}
+            />
+            CSS
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="Photoshop"
+              checked={searchSkills.includes("Photoshop")}
+              onChange={handleSkillChange}
+            />
+            Photoshop
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="Manual Testing"
+              checked={searchSkills.includes("Manual Testing")}
+              onChange={handleSkillChange}
+            />
+            Manual Testing
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="Java"
+              checked={searchSkills.includes("Java")}
+              onChange={handleSkillChange}
+            />
+            Java
+          </label>
+        </div>
       </div>
 
       {filteredDevelopers.length > 0 ? (
         <div className="developer-list">
           {filteredDevelopers.map((developer) => (
-            <div className="developer" key={developer.id}>
-              <h2>{developer.name}</h2>
-              <p>Designation: {developer.designation || "Not specified"}</p>
+            <div key={developer.id} className="developer">
+              <h3>{developer.name}</h3>
+              <p>Designation: {developer.designation}</p>
               <p>Skills: {developer.skills.join(", ")}</p>
-
-              {developer.projects && (
-                <div className="project-list">
-                  <h3>Projects</h3>
-                  {developer.projects.map((project, index) => (
-                    <div className="project" key={index}>
-                      <h4>{project.name}</h4>
-                      <p>
-                        Description: {project.description || "Not specified"}
-                      </p>
-
-                      {project.team.length > 0 && (
-                        <div className="team">
-                          <h5>Team</h5>
-                          {project.team.map((teamMember, index) => (
-                            <div className="team-member" key={index}>
-                              <p>Name: {teamMember.name || "Not specified"}</p>
-                              <p>Role: {teamMember.role}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {project.tasks && project.tasks.length > 0 && (
-                        <div>
-                          <h5>Tasks</h5>
-                          {project.tasks.map((task, index) => (
-                            <div key={index}>
-                              <p>ID: {task.id}</p>
-                              <p>Name: {task.name || "Not specified"}</p>
-                              <p>Status: {task.status || "Not specified"}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           ))}
         </div>
